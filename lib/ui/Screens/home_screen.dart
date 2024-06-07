@@ -1,9 +1,5 @@
-import 'package:contact_list/ui/Widgets/custom_appbar.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
-import 'package:contact_list/ui/Widgets/contact_tile.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,13 +14,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
   List<Map<String, String>> _contacts = [];
-  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
 
   void _addContact() {
-    setState(() {
-      _autovalidateMode = AutovalidateMode.onUserInteraction;
-    });
-
     if (_formkey.currentState!.validate()) {
       setState(() {
         _contacts.add({
@@ -33,10 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
         });
         _nameTEcontroller.clear();
         _numberTEcontroller.clear();
-        _autovalidateMode = AutovalidateMode.disabled;
       });
     }
   }
+
 
   void _deleteContact(int index) {
     setState(() {
@@ -44,29 +35,32 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+
+
+
   Future<void> _showDeleteConfirmationDialog(int index) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Confirm'),
-          content: const SingleChildScrollView(
+          title: Text('Confirm'),
+          content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Are you sure for delete ?'),
+                Text('Are you sure you want to delete this contact?'),
               ],
             ),
           ),
           actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.no_sim_outlined, color: Colors.blue),
+            TextButton(
+              child: Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.blue),
+            TextButton(
+              child: Text('Delete'),
               onPressed: () {
                 _deleteContact(index);
                 Navigator.of(context).pop();
@@ -78,22 +72,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    _nameTEcontroller.dispose();
-    _numberTEcontroller.dispose();
-    super.dispose();
-  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: "Contact List"),
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: Center(
+          child: Text(
+            "Contact List",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Form(
           key: _formkey,
-          autovalidateMode: _autovalidateMode,
           child: Column(
             children: [
               TextFormField(
@@ -105,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (String? value) {
                   if (value?.trim().isEmpty ?? true) {
                     return "Please enter the Name";
@@ -112,12 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   return null;
                 },
               ),
-              const Gap(10),
+              Gap(10),
               TextFormField(
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
                 controller: _numberTEcontroller,
                 decoration: InputDecoration(
                   hintText: "Number",
@@ -126,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (String? value) {
                   if (value?.trim().isEmpty ?? true) {
                     return "Please enter the Number";
@@ -133,37 +131,79 @@ class _HomeScreenState extends State<HomeScreen> {
                   return null;
                 },
               ),
-              const Gap(20),
+              Gap(20),
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: ElevatedButton(
                   onPressed: _addContact,
-                  child: const Text("Add"),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.blue,
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    elevation: 5,
+                  ),
+                  child: Text("Add"),
                 ),
               ),
-              const Gap(20),
+              Gap(20),
               Expanded(
                 child: ListView.separated(
                   itemCount: _contacts.length,
                   itemBuilder: (context, index) {
-                    return ContactTile(
-                      name: _contacts[index]['name']!,
-                      number: _contacts[index]['number']!,
-                      onLongPress: () {
-                        _showDeleteConfirmationDialog(index);
-                      },
-                      onCallPressed: () {
-                        // Handle call action
-                      },
-                    );
+                    return GestureDetector(
+                        onLongPress: () {
+                      _showDeleteConfirmationDialog(index);
+                    },
+
+                      child:ListTile(
+                      title: Text(
+                        _contacts[index]['name']!,
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        _contacts[index]['number']!,
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.blue,
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.white,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          Icons.call,
+                          color: Colors.green,
+                        ),
+                        onPressed: () {
+                          // Handle call action
+                        },
+                      ),
+                      tileColor: Colors.grey[200],
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      ),);
                   },
                   separatorBuilder: (context, index) {
                     return Divider(
                       color: Colors.grey[400],
-                      height: 2,
-                      thickness: 2,
-                      indent: 20,
-                      endIndent: 20,
+                      height: 1,
+                      thickness: 1,
+                      indent: 16,
+                      endIndent: 16,
                     );
                   },
                 ),
