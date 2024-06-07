@@ -19,13 +19,10 @@ class ContactTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onLongPress: onLongPress,
-      child: Container(
-        height: 80,
-        child: ListTile(
+      child:  ListTile(
           title: Text(
             name,
             style: const TextStyle(
-              color: Colors.red,
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
             ),
@@ -37,25 +34,27 @@ class ContactTile extends StatelessWidget {
               color: Colors.grey[600],
             ),
           ),
-          leading:  Icon(
+          leading: const CircleAvatar(
+            backgroundColor: Colors.blue,
+            child: Icon(
               Icons.person,
-              color: Colors.brown,
+              color: Colors.white,
             ),
-
+          ),
           trailing: IconButton(
             icon: const Icon(
               Icons.call,
-              color: Colors.blue,
+              color: Colors.green,
             ),
             onPressed: onCallPressed,
           ),
-          tileColor: Colors.grey.shade200,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          tileColor: Colors.grey[200],
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5.0),
           ),
         ),
-      ),
     );
+
   }
 }
